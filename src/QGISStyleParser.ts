@@ -162,11 +162,25 @@ export class QGISStyleParser implements StyleParser {
    */
   qmlSymbolizerLayerPropsToObject(qmlSymbolizer: any) {
     const qmlMarkerProps: any = {};
-    qmlSymbolizer.prop.forEach((prop: QmlProp) => {
-      const key = prop.$.k;
-      const value = prop.$.v;
-      qmlMarkerProps[key] = value;
-    });
+    if (qmlSymbolizer.prop) {
+      qmlSymbolizer.prop.forEach((prop: QmlProp) => {
+        const key = prop.$.k;
+        const value = prop.$.v;
+        qmlMarkerProps[key] = value;
+      });
+    }
+    else if (qmlSymbolizer.Option) {
+      qmlSymbolizer.Option.forEach(function (outerOption: any) {
+          if (outerOption.$.type!="Map")
+              return;
+          outerOption.Option.forEach(function (innerOption : any) {
+              var key = innerOption.$.name;
+              var value = innerOption.$.value;
+              qmlMarkerProps[key] = value;
+          });
+      });
+    }
+    
     return qmlMarkerProps;
   }
 
