@@ -1,6 +1,6 @@
 {
-  "name": "geostyler-qgis-parser",
-  "version": "2.0.0",
+  "name": "geostyler-qgis-parser-infas",
+  "version": "0.0.1",
   "description": "GeoStyler Style Parser implementation for QGIS Style",
   "main": "build/dist/QGISStyleParser.js",
   "types": "build/dist/QGISStyleParser.d.ts",
@@ -44,7 +44,7 @@
   "scripts": {
     "build-browser": "webpack --config browser-build.config.js",
     "build-dist": "tsc -p tsconfig.json",
-    "build": "npm run build-dist && npm run build-browser",
+    "build": "npm run build-dist",
     "lint:test:build": "npm run lint && npm run test && npm run build",
     "lint:test": "npm run lint && npm run test",
     "lint": "eslint -c .eslintrc.js --ext .ts . && tsc --noEmit --project tsconfig.json",
