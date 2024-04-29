@@ -13,7 +13,8 @@ import {
   TextSymbolizer,
   WriteStyleResult,
   ReadStyleResult,
-  isGeoStylerFunction
+  isGeoStylerFunction,
+  DistanceUnit
 } from 'geostyler-style';
 
 import { CqlParser } from 'geostyler-cql-parser';
@@ -25,6 +26,7 @@ import {
 } from 'xml2js';
 
 import _get from 'lodash/get';
+import { isNumber } from 'lodash';
 
 type SymbolizerMap = {
   [key: string]: Symbolizer[];
@@ -232,6 +234,43 @@ export class QGISStyleParser implements StyleParser {
     const colorArray = qmlColor.split(',');
     const color = Color(`rgb(${colorArray[0]},${colorArray[1]},${colorArray[2]})`);
     return color.hex();
+  }
+
+  /**
+   *
+   * @param qmlUnit
+   */
+  qmlUnitToDistanceUnit(qmlUnit: string): DistanceUnit {
+    if (qmlUnit=="RenderMetersInMapUnits")
+      return "m";
+    return "px";
+  }
+
+  /**
+   *
+   * @param isDefaultUnit
+   */
+  isDefaultUnit(dstUnit: DistanceUnit): boolean {
+    return dstUnit=="px";
+  }
+
+  /**
+   *
+   * @param value
+   * @param qmlUnit
+   * @param dstUnit
+   */
+  unitValueToDistanceUnitValue(value: number, qmlUnit: string, dstUnit: DistanceUnit): number {
+    if (qmlUnit=="RenderMetersInMapUnits" && dstUnit=="m")
+      return value;
+    if (qmlUnit=="Pixel" && dstUnit=="px")
+      return value;
+    if (qmlUnit=="Point") // 1pt ~ 1.33 CSS-Pixel
+      return this.unitValueToDistanceUnitValue(value*1.33,"Pixel",dstUnit);
+    if (qmlUnit=="MM") // 1mm ~ 3.78 CSS-Pixel
+      return this.unitValueToDistanceUnitValue(value*3.78,"Pixel",dstUnit);
+
+    throw new Error('Failed to get value given in' + qmlUnit + ' with new unit ' + dstUnit);
   }
 
   /**
@@ -454,6 +493,13 @@ export class QGISStyleParser implements StyleParser {
     if (styleProperties.fontSize) {
       textSymbolizer.size = parseFloat(styleProperties.fontSize);
     }
+    if (styleProperties.fontSizeUnit && isNumber(textSymbolizer.size)&& textSymbolizer.size!=0) {
+      const sizeUnit:DistanceUnit = this.qmlUnitToDistanceUnit(styleProperties.fontSizeUnit); 
+      if (!this.isDefaultUnit(sizeUnit)) {
+        textSymbolizer["sizeUnit"] = sizeUnit;
+      }
+      textSymbolizer.size = this.unitValueToDistanceUnitValue(textSymbolizer.size, styleProperties.fontSizeUnit, sizeUnit);
+    }
     if (styleProperties.fontFamily) {
       textSymbolizer.font = [styleProperties.fontFamily];
     }
@@ -560,6 +606,13 @@ export class QGISStyleParser implements StyleParser {
     if (qmlMarkerProps.outline_width) {
       markSymbolizer.strokeWidth = parseFloat(qmlMarkerProps.outline_width);
     }
+    if (qmlMarkerProps.outline_width_unit && isNumber(markSymbolizer.strokeWidth) && markSymbolizer.strokeWidth!=0) {
+      const outline_width_unit:DistanceUnit = this.qmlUnitToDistanceUnit(qmlMarkerProps.outline_width_unit);
+      if (!this.isDefaultUnit(outline_width_unit)) {
+        markSymbolizer.strokeWidthUnit = outline_width_unit;
+      }      
+      markSymbolizer.strokeWidth = this.unitValueToDistanceUnitValue(markSymbolizer.strokeWidth, qmlMarkerProps.outline_width_unit, outline_width_unit);
+    }
 
     return markSymbolizer;
   }
@@ -599,6 +652,14 @@ export class QGISStyleParser implements StyleParser {
       }
       if (qmlMarkerProps.line_width) {
         lineSymbolizer.width = parseFloat(qmlMarkerProps.line_width);
+      if (qmlMarkerProps.line_width_unit && isNumber(qmlMarkerProps.line_width) && lineSymbolizer.width!=0) {
+        const line_width_unit:DistanceUnit = this.qmlUnitToDistanceUnit(qmlMarkerProps.line_width_unit);
+        if (!this.isDefaultUnit(line_width_unit)) {
+          lineSymbolizer.widthUnit = line_width_unit;
+        }          
+        lineSymbolizer.width = this.unitValueToDistanceUnitValue(lineSymbolizer.width, qmlMarkerProps.line_width_unit, line_width_unit);
+      }
+      
       }
 
       return lineSymbolizer;
@@ -659,6 +720,14 @@ export class QGISStyleParser implements StyleParser {
 
       if (qmlMarkerProps.outline_width && 'no' !== outlineStyle) {
         fillSymbolizer.outlineWidth = parseFloat(qmlMarkerProps.outline_width);
+      }
+
+      if (fillSymbolizer.outlineWidth && qmlMarkerProps.outline_width_unit && isNumber(fillSymbolizer.outlineWidth) && fillSymbolizer.outlineWidth!=0) {
+        const outline_width_unit:DistanceUnit = this.qmlUnitToDistanceUnit(qmlMarkerProps.outline_width_unit); 
+        if (!this.isDefaultUnit(outline_width_unit)) {
+          fillSymbolizer.outlineWidthUnit = outline_width_unit;
+        }
+        fillSymbolizer.outlineWidth = this.unitValueToDistanceUnitValue(fillSymbolizer.outlineWidth, qmlMarkerProps.outline_width_unit, outline_width_unit);
       }
 
       return fillSymbolizer;
