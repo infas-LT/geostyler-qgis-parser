@@ -324,6 +324,35 @@ export class QGISStyleParser implements StyleParser {
         ]
       };
 
+    // Additionally, deliver rules for texts
+    if (labelMap && qmlLabeling && Array.isArray(qmlLabeling.rules) && qmlLabeling.rules.length>0) {        
+      if (Array.isArray(qmlLabeling.rules[0].rule) && qmlRules.length > 0) {
+        qmlLabeling.rules[0].rule.forEach((qmlLabelRule: QmlRule, index: number) => {
+          const labelfilter: Filter | undefined = this.getFilterFromQmlRule(qmlLabelRule);
+          const labelScaleDenominator: ScaleDenominator | undefined = this.getScaleDenominatorFromRule(qmlLabelRule);
+          const labelName = qmlLabelRule["description"] || qmlLabelRule.$.filter;
+          const labelSymbolizerId: string = qmlLabelRule.$.filter? qmlLabelRule.$.filter.toString() : "a";            
+          let labelRule: Rule = <Rule> {
+              
+          };
+          if (labelName) {
+            labelRule.name = labelName;
+          }
+          if (labelfilter) {
+            labelRule.filter = labelfilter;
+          }
+          if (labelScaleDenominator) {
+            labelRule.scaleDenominator = labelScaleDenominator;
+          }
+          if (Object.keys(labelMap).length > 0 && labelMap[labelSymbolizerId]) {
+            labelRule.symbolizers = labelMap[labelSymbolizerId];
+          }
+          rules.push(labelRule);
+        });
+    }
+
+  }
+
       try {
         const filter = this.cqlParser.read(Object.keys(labelMap)[0]);
         if (filter) {
