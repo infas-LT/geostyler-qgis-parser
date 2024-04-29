@@ -32,10 +32,6 @@ type SymbolizerMap = {
   [key: string]: Symbolizer[];
 };
 
-type LabelMap = {
-  [filter: string]: TextSymbolizer[];
-};
-
 type QmlProp = {
   $: {
     k: any;
@@ -288,15 +284,17 @@ export class QGISStyleParser implements StyleParser {
     const qmlLabeling = _get(qmlObject, 'qgis.labeling.[0]');
     let rules: Rule[] = [];
     let symbolizerMap: SymbolizerMap = {};
-    let labelMap: LabelMap = {};
+    let labelRules: Rule[] = [];
     let handleLabelRules : boolean = true;
 
+    // geometry-symbolizers use 2 collections: rules and symbols, where every rule references exactly on symbol
     if (Array.isArray(qmlSymbols)) {
       symbolizerMap = this.parseQmlSymbolizers(qmlSymbols);
     }
 
+    // labeling-rules and their properties have a 1:1 relationship, without a reference
     if (qmlLabeling) {
-      labelMap = this.parseQmlLabeling(qmlLabeling);
+      labelRules = this.parseQmlLabelingRules(qmlLabeling);
     }
 
     if (Array.isArray(qmlRules) && qmlRules.length > 0) {
@@ -355,7 +353,8 @@ export class QGISStyleParser implements StyleParser {
       });
     } else {
       const symbolizers = symbolizerMap[Object.keys(symbolizerMap)[0]] || [];
-      const labels = labelMap[Object.keys(labelMap)[0]] || [];
+      const firstLabelRule = labelRules && labelRules.length>0 ? labelRules[0] : null;
+      const labels = firstLabelRule ? firstLabelRule.symbolizers : [];
       const rule: Rule = {
         name: 'QGIS Simple Symbol',
         symbolizers:  [
@@ -366,47 +365,26 @@ export class QGISStyleParser implements StyleParser {
 
       handleLabelRules = false;
 
-      try {
+      if (firstLabelRule && firstLabelRule.filter)
+        rule.filter = firstLabelRule.filter;
+
+      /*try {
         const filter = this.cqlParser.read(Object.keys(labelMap)[0]);
         if (filter) {
           rule.filter = filter as Filter;
         }
       } catch (e) {
         // in the case of made up filters
-      }
+      }*/
 
       rules.push(rule);
     }
 
     // Additionally, deliver rules for texts
-    if (handleLabelRules && labelMap && qmlLabeling && Array.isArray(qmlLabeling.rules) && qmlLabeling.rules.length>0) {        
-      if (Array.isArray(qmlLabeling.rules[0].rule) ) {
-        qmlLabeling.rules[0].rule.forEach((qmlLabelRule: QmlRule, index: number) => {
-          const labelfilter: Filter | undefined = this.getFilterFromQmlRule(qmlLabelRule);
-          const labelScaleDenominator: ScaleDenominator | undefined = this.getScaleDenominatorFromRule(qmlLabelRule);
-          const labelName = qmlLabelRule.$["description"] || qmlLabelRule.$.filter;
-          const labelSymbolizerId: string = qmlLabelRule.$.filter? qmlLabelRule.$.filter.toString() : "a";            
-          let labelRule: Rule = <Rule> {
-              
-          };
-          if (labelName) {
-            labelRule.name = labelName;
-          }
-          if (labelfilter) {
-            labelRule.filter = labelfilter;
-          }
-          if (labelScaleDenominator) {
-            labelRule.scaleDenominator = labelScaleDenominator;
-          }
-          if (Object.keys(labelMap).length > 0 && labelMap[labelSymbolizerId]) {
-            labelRule.symbolizers = labelMap[labelSymbolizerId];
-          }
-          rules.push(labelRule);
-        });
-    }
-  }
+    if (handleLabelRules && labelRules)
+      rules.push(...labelRules);    
 
-  return rules;
+    return rules;
   }
 
   /**
@@ -451,25 +429,50 @@ export class QGISStyleParser implements StyleParser {
    *
    * @param qmlLabels
    */
-  parseQmlLabeling(qmlLabeling: any): LabelMap {
+  parseQmlLabelingRules(qmlLabeling: any): Rule[] {
     const type = qmlLabeling.$.type;
-    const labelMap: LabelMap = {};
+    let rules: Rule[] = [];
 
     if (type === 'rule-based') {
-      const rules = _get(qmlLabeling, 'rules[0].rule');
-      rules.forEach((rule: QmlRule, index: number) => {
-        const settings = _get(rule, 'settings[0]');
+      const qmlRules = _get(qmlLabeling, 'rules[0].rule');
+      qmlRules.forEach((qmlRule: QmlRule, index: number) => {
+        const settings = _get(qmlRule, 'settings[0]');
         const textSymbolizer = this.getTextSymbolizerFromLabelSettings(settings);
-        labelMap[rule.$.filter || index] = [textSymbolizer];
+        //labelMap[rule.$.filter || index] = [textSymbolizer];
+
+        const filter: Filter | undefined = this.getFilterFromQmlRule(qmlRule);
+        const scaleDenominator: ScaleDenominator | undefined = this.getScaleDenominatorFromRule(qmlRule);
+        const name = qmlRule.$.label || qmlRule.$["description"] || qmlRule.$.filter;
+        let rule: Rule = <Rule> {
+          name
+        };
+        if (filter) {
+          rule.filter = filter;
+        }
+        if (scaleDenominator) {
+          rule.scaleDenominator = scaleDenominator;
+        }
+        if (textSymbolizer) {
+          rule.symbolizers = [textSymbolizer];
+        }
+        rules.push(rule);
+
       });
     }
     if (type === 'simple') {
       const settings = _get(qmlLabeling, 'settings[0]');
       const textSymbolizer = this.getTextSymbolizerFromLabelSettings(settings);
-      labelMap.a = [textSymbolizer];
+      const name = "a";
+      let rule: Rule = <Rule> {
+        name
+      };      
+      if (textSymbolizer) {
+        rule.symbolizers = [textSymbolizer];
+      }
+      rules.push(rule);
     }
 
-    return labelMap;
+    return rules;
   }
 
   /**
