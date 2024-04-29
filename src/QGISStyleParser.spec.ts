@@ -53,7 +53,7 @@ describe('QMLStyleParser implements StyleParser', () => {
         expect(geoStylerStyle).toEqual(point_multiple_symbols);
       });
     });
-    /*describe('TextSymbolizer', () => {
+    describe('TextSymbolizer', () => {
       it('can read some basics of the QML Labeling for Points', async () => {
         expect.assertions(2);
         const qml = fs.readFileSync('./data/qmls/point_label.qml', 'utf8');
@@ -61,7 +61,7 @@ describe('QMLStyleParser implements StyleParser', () => {
         expect(geoStylerStyle).toBeDefined();
         expect(geoStylerStyle).toEqual(point_label);
       });
-    });*/
+    });
     describe('LineSymbolizer', () => {
       it('can read a simple QML LineSymbol', async () => {
         expect.assertions(2);
