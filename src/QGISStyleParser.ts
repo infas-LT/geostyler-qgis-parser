@@ -310,9 +310,21 @@ export class QGISStyleParser implements StyleParser {
         ]
       };
 
+      try {
+        const filter = this.cqlParser.read(Object.keys(labelMap)[0]);
+        if (filter) {
+          rule.filter = filter as Filter;
+        }
+      } catch (e) {
+        // in the case of made up filters
+      }
+
+      rules.push(rule);
+    }
+
     // Additionally, deliver rules for texts
     if (labelMap && qmlLabeling && Array.isArray(qmlLabeling.rules) && qmlLabeling.rules.length>0) {        
-      if (Array.isArray(qmlLabeling.rules[0].rule) && qmlRules.length > 0) {
+      if (Array.isArray(qmlLabeling.rules[0].rule) ) {
         qmlLabeling.rules[0].rule.forEach((qmlLabelRule: QmlRule, index: number) => {
           const labelfilter: Filter | undefined = this.getFilterFromQmlRule(qmlLabelRule);
           const labelScaleDenominator: ScaleDenominator | undefined = this.getScaleDenominatorFromRule(qmlLabelRule);
@@ -336,22 +348,9 @@ export class QGISStyleParser implements StyleParser {
           rules.push(labelRule);
         });
     }
-
   }
 
-      try {
-        const filter = this.cqlParser.read(Object.keys(labelMap)[0]);
-        if (filter) {
-          rule.filter = filter as Filter;
-        }
-      } catch (e) {
-        // in the case of made up filters
-      }
-
-      rules.push(rule);
-    }
-
-    return rules;
+  return rules;
   }
 
   /**
