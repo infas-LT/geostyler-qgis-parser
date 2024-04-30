@@ -652,14 +652,13 @@ export class QGISStyleParser implements StyleParser {
       }
       if (qmlMarkerProps.line_width) {
         lineSymbolizer.width = parseFloat(qmlMarkerProps.line_width);
-      if (qmlMarkerProps.line_width_unit && isNumber(qmlMarkerProps.line_width) && lineSymbolizer.width!=0) {
+      }
+      if (qmlMarkerProps.line_width_unit && isNumber(lineSymbolizer.width) && lineSymbolizer.width!=0) {
         const line_width_unit:DistanceUnit = this.qmlUnitToDistanceUnit(qmlMarkerProps.line_width_unit);
         if (!this.isDefaultUnit(line_width_unit)) {
           lineSymbolizer.widthUnit = line_width_unit;
         }          
         lineSymbolizer.width = this.unitValueToDistanceUnitValue(lineSymbolizer.width, qmlMarkerProps.line_width_unit, line_width_unit);
-      }
-      
       }
 
       return lineSymbolizer;
