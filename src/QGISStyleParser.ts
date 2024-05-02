@@ -179,6 +179,16 @@ export class QGISStyleParser implements StyleParser {
               qmlMarkerProps[key] = value;
           });
       });
+
+    // some properties seem to be renamed
+    if (!qmlMarkerProps.outlineColor && qmlMarkerProps["line_color"])
+      qmlMarkerProps.outlineColor = qmlMarkerProps["line_color"];
+    if (!qmlMarkerProps.outline_style && qmlMarkerProps["line_style"])
+      qmlMarkerProps.outline_style = qmlMarkerProps["line_style"];
+    if (!qmlMarkerProps.outline_width && qmlMarkerProps["line_width"])
+      qmlMarkerProps.outline_width = qmlMarkerProps["line_width"];
+    if (!qmlMarkerProps.outline_width_unit && qmlMarkerProps["line_width_unit"])
+      qmlMarkerProps.outline_width_unit = qmlMarkerProps["line_width_unit"];
     }
     
     return qmlMarkerProps;
