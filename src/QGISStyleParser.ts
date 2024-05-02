@@ -179,8 +179,8 @@ export class QGISStyleParser implements StyleParser {
       });
 
     // some properties seem to be renamed
-    if (!qmlMarkerProps.outlineColor && qmlMarkerProps["line_color"])
-      qmlMarkerProps.outlineColor = qmlMarkerProps["line_color"];
+    if (!qmlMarkerProps.outline_Color && qmlMarkerProps["line_color"])
+      qmlMarkerProps.outline_Color = qmlMarkerProps["line_color"];
     if (!qmlMarkerProps.outline_style && qmlMarkerProps["line_style"])
       qmlMarkerProps.outline_style = qmlMarkerProps["line_style"];
     if (!qmlMarkerProps.outline_width && qmlMarkerProps["line_width"])
