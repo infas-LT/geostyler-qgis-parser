@@ -179,14 +179,14 @@ export class QGISStyleParser implements StyleParser {
       });
 
     // some properties seem to be renamed
-    if (!qmlMarkerProps.outline_Color && qmlMarkerProps["line_color"])
-      qmlMarkerProps.outline_Color = qmlMarkerProps["line_color"];
-    if (!qmlMarkerProps.outline_style && qmlMarkerProps["line_style"])
-      qmlMarkerProps.outline_style = qmlMarkerProps["line_style"];
-    if (!qmlMarkerProps.outline_width && qmlMarkerProps["line_width"])
-      qmlMarkerProps.outline_width = qmlMarkerProps["line_width"];
-    if (!qmlMarkerProps.outline_width_unit && qmlMarkerProps["line_width_unit"])
-      qmlMarkerProps.outline_width_unit = qmlMarkerProps["line_width_unit"];
+    if (!qmlMarkerProps.outline_color && qmlMarkerProps.line_color)
+      qmlMarkerProps.outline_color = qmlMarkerProps.line_color;
+    if (!qmlMarkerProps.outline_style && qmlMarkerProps.line_style)
+      qmlMarkerProps.outline_style = qmlMarkerProps.line_style;
+    if (!qmlMarkerProps.outline_width && qmlMarkerProps.line_width)
+      qmlMarkerProps.outline_width = qmlMarkerProps.line_width;
+    if (!qmlMarkerProps.outline_width_unit && qmlMarkerProps.line_width_unit)
+      qmlMarkerProps.outline_width_unit = qmlMarkerProps.line_width_unit;
     }
     
     return qmlMarkerProps;
