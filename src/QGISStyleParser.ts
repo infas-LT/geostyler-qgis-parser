@@ -412,6 +412,13 @@ export class QGISStyleParser implements StyleParser {
     if (styleProperties.fontFamily) {
       textSymbolizer.font = [styleProperties.fontFamily];
     }
+    if (styleProperties.fontWeight) {      
+      // see src/core/symbology/qgssymbollayerutils.cpp, QgsSymbolLayerUtils::encodeSldFontWeight
+      textSymbolizer.fontWeight = styleProperties.fontWeight>=70 ? "bold" : "normal";      
+    }
+    if (styleProperties['fontItalic']) {
+      textSymbolizer.fontStyle = "italic";
+    }
     if (styleProperties.fontLetterSpacing && parseFloat(styleProperties.fontLetterSpacing) > 0) {
       textSymbolizer.letterSpacing = parseFloat(styleProperties.fontLetterSpacing);
     }
