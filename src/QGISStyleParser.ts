@@ -446,7 +446,7 @@ export class QGISStyleParser implements StyleParser {
         parseFloat(placementProperties.yOffset)
       ];
     }
-    if (placementProperties.quadOffset && isNumber(placementProperties.quadOffset))
+    if (placementProperties.quadOffset)
       this.qmlApplyQuadOffsetToAnchor(Number(placementProperties.quadOffset), textSymbolizer);
     return textSymbolizer;
   }
