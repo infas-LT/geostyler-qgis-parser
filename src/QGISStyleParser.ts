@@ -249,6 +249,7 @@ export class QGISStyleParser implements StyleParser {
    * @param {TextSymbolizer} textSymbolizer The TextSymbolizer whose anchor-property has to be set
    */
   qmlApplyQuadOffsetToAnchor(qmlQuadOffset: number, textSymbolizer: TextSymbolizer): void {
+
     switch(qmlQuadOffset) {
       case 0: textSymbolizer.anchor = "top-left"; break;
       case 1: textSymbolizer.anchor = "top"; break;
@@ -559,8 +560,8 @@ export class QGISStyleParser implements StyleParser {
         parseFloat(placementProperties.yOffset)
       ];
     }
-    if (placementProperties.quadOffset)
-      this.qmlApplyQuadOffsetToAnchor(placementProperties.quadOffset, textSymbolizer);
+    if (placementProperties.quadOffset && isNumber(placementProperties.quadOffset))
+      this.qmlApplyQuadOffsetToAnchor(Number(placementProperties.quadOffset), textSymbolizer);
     return textSymbolizer;
   }
 
