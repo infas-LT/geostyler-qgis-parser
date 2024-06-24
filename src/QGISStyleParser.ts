@@ -243,6 +243,27 @@ export class QGISStyleParser implements StyleParser {
   }
 
   /**
+   * Get the anchor-mode from an QML quadOffset-entry.
+   *
+   * @param {number} qmlQuadOffset The QML quadOffset-entry
+   * @param {TextSymbolizer} textSymbolizer The TextSymbolizer whose anchor-property has to be set
+   */
+  qmlApplyQuadOffsetToAnchor(qmlQuadOffset: number, textSymbolizer: TextSymbolizer): void {
+    switch(qmlQuadOffset) {
+      case 0: textSymbolizer.anchor = "top-left"; break;
+      case 1: textSymbolizer.anchor = "top"; break;
+      case 2: textSymbolizer.anchor = "top-right"; break;
+      case 3: textSymbolizer.anchor = "left"; break;
+      case 4: textSymbolizer.anchor = "center"; break;
+      case 5: textSymbolizer.anchor = "right"; break;
+      case 6: textSymbolizer.anchor = "bottom-left"; break;
+      case 7: textSymbolizer.anchor = "bottom"; break;
+      case 8: textSymbolizer.anchor = "bottom-right"; break;
+      default: throw new Error('Unexpected value for qmlQuadOffset'); 
+    }    
+  }
+
+  /**
    *
    * @param qmlUnit
    */
@@ -538,6 +559,8 @@ export class QGISStyleParser implements StyleParser {
         parseFloat(placementProperties.yOffset)
       ];
     }
+    if (placementProperties.quadOffset)
+      this.qmlApplyQuadOffsetToAnchor(placementProperties.quadOffset, textSymbolizer);
     return textSymbolizer;
   }
 
