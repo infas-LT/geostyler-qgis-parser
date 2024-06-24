@@ -392,8 +392,8 @@ export class QGISStyleParser implements StyleParser {
         symbolizers:  [
           ...symbolizers,
           ...labels
-        ]        
-      };   
+        ]
+      };
 
       handleLabelRules = false;
 
@@ -541,12 +541,12 @@ export class QGISStyleParser implements StyleParser {
     if (styleProperties.fontFamily) {
       textSymbolizer.font = [styleProperties.fontFamily];
     }
-    if (styleProperties.fontWeight && styleProperties.fontWeight>=70) {      
+    if (styleProperties.fontWeight && styleProperties.fontWeight>=70) {
       // see src/core/symbology/qgssymbollayerutils.cpp, QgsSymbolLayerUtils::encodeSldFontWeight
-      textSymbolizer.fontWeight = "bold";      
+      textSymbolizer.fontWeight = 'bold';
     }
-    if (styleProperties['fontItalic']) {
-      textSymbolizer.fontStyle = "italic";
+    if (styleProperties.fontItalic && parseFloat(styleProperties.fontItalic) > 0) {
+      textSymbolizer.fontStyle = 'italic';
     }
     if (styleProperties.fontLetterSpacing && parseFloat(styleProperties.fontLetterSpacing) > 0) {
       textSymbolizer.letterSpacing = parseFloat(styleProperties.fontLetterSpacing);
