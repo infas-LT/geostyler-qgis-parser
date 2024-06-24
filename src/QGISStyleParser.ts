@@ -250,6 +250,7 @@ export class QGISStyleParser implements StyleParser {
    */
   qmlApplyQuadOffsetToAnchor(qmlQuadOffset: number, textSymbolizer: TextSymbolizer): void {
 
+
     switch(qmlQuadOffset) {
       case 0: textSymbolizer.anchor = "top-left"; break;
       case 1: textSymbolizer.anchor = "top"; break;
