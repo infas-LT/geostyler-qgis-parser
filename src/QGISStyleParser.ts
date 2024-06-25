@@ -603,17 +603,39 @@ export class QGISStyleParser implements StyleParser {
    * @return {PointSymbolizer} The GeoStyler-Style PointSymbolizer
    */
   getPointSymbolizersFromQmlSymbolizer(qmlSymbolizer: any): PointSymbolizer[] {
+
+    const symbolizerCommonOpacity = _get(qmlSymbolizer, '$.alpha');
+
     return qmlSymbolizer.layer.map((symbolizerLayer: any) => {
       const markerClass = symbolizerLayer.$.class;
+
+      var result : PointSymbolizer;
       switch (markerClass) {
         case 'SimpleMarker':
-          return this.getPointSymbolizerFromMarkLayer(symbolizerLayer);
+          result = this.getPointSymbolizerFromMarkLayer(symbolizerLayer);
+          break;
         case 'SvgMarker':
-          return this.getPointSymbolizerFromSvgLayer(symbolizerLayer);
+          result = this.getPointSymbolizerFromSvgLayer(symbolizerLayer);
+          break;
         default:
-          throw new Error(`Failed to parse MarkerClass ${markerClass} from qmlSymbolizer`);
-      }
-    });
+          throw new Error(`Failed to parse MarkerClass ${markerClass} from qmlSymbolizer`);        
+        }
+
+        // To be able to fulfill the tests, set opacity=1 here, even if this is the default value.
+        if (result && symbolizerCommonOpacity) {
+          var opacity = parseFloat(symbolizerCommonOpacity);
+          if (result.opacity && opacity!==1.0) {
+            result.opacity = Number(result.opacity) * opacity;
+          }
+          else {
+            result.opacity = opacity;
+          }
+        }
+        else {          
+          result.opacity = 1.0;
+        }
+        return result;      
+      });
   }
 
   /**
@@ -632,7 +654,9 @@ export class QGISStyleParser implements StyleParser {
     markSymbolizer.wellKnownName = qmlMarkerProps.name;
 
     if (qmlMarkerProps.color) {
-      markSymbolizer.opacity = this.qmlColorToOpacity(qmlMarkerProps.color);
+      var fillOpacity = this.qmlColorToOpacity(qmlMarkerProps.color);
+      if (fillOpacity!==1.0)
+        markSymbolizer.fillOpacity = fillOpacity;
       markSymbolizer.color = this.qmlColorToHex(qmlMarkerProps.color);
     }
 
