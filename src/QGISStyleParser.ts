@@ -715,7 +715,9 @@ export class QGISStyleParser implements StyleParser {
       if (qmlMarkerProps.joinstyle) {
         lineSymbolizer.join = qmlMarkerProps.joinstyle;
       }
-      if (qmlMarkerProps.customdash) {
+      // if we know that no custom-dash is used, we shouldn't transfer this property
+      const ignoreCustomDash = qmlMarkerProps.use_custom_dash && parseFloat(qmlMarkerProps.offset)===0;
+      if (qmlMarkerProps.customdash && !ignoreCustomDash) {
         lineSymbolizer.dasharray = qmlMarkerProps.customdash.split(';').map(parseFloat);
       }
       if (qmlMarkerProps.offset) {
